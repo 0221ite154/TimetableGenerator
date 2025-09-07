@@ -1,0 +1,913 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Timetable App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #1a202c;
+            --bg-medium: #2d3748;
+            --bg-light: #4a5568;
+            --text-light: #e2e8f0;
+            --text-dark: #1a202c;
+            --accent-blue: #4299e1;
+            --accent-green: #48bb78;
+            --accent-orange: #ed8936;
+            --border-color: #4a5568;
+            --error-red: #e53e3e;
+            --subject-color-1: #4299e1;
+            --subject-color-2: #48bb78;
+            --subject-color-3: #ed8936;
+            --subject-color-4: #9f7aea;
+            --subject-color-5: #f6ad55;
+            --shadow-light: rgba(0, 0, 0, 0.1);
+            --shadow-dark: rgba(0, 0, 0, 0.4);
+        }
+
+        [data-theme="light"] {
+            --bg-dark: #f7fafc;
+            --bg-medium: #edf2f7;
+            --bg-light: #e2e8f0;
+            --text-light: #2d3748;
+            --text-dark: #fff;
+            --border-color: #cbd5e0;
+            --shadow-light: rgba(0, 0, 0, 0.05);
+            --shadow-dark: rgba(0, 0, 0, 0.2);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            transition: background-color 0.3s ease;
+        }
+
+        /* Layout */
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: var(--bg-medium);
+            padding: 24px;
+            box-shadow: 2px 0 5px var(--shadow-dark);
+            display: none; /* Initially hidden */
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            text-align: center;
+            color: var(--accent-blue);
+            margin-bottom: 40px;
+        }
+
+        .sidebar nav a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            color: var(--text-light);
+            text-decoration: none;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            transition: background-color 0.2s, color 0.2s;
+        }
+
+        .sidebar nav a:hover,
+        .sidebar nav a.active {
+            background-color: var(--accent-blue);
+            color: var(--text-dark);
+        }
+
+        .main-content {
+            flex-grow: 1;
+            padding: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Login Page Styling */
+        .login-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            width: 100%;
+            background-color: var(--bg-dark);
+            text-align: center;
+        }
+
+        .login-card {
+            background-color: var(--bg-medium);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px var(--shadow-dark);
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .login-card h2 {
+            color: var(--accent-blue);
+            margin-bottom: 24px;
+        }
+
+        .login-card input[type="text"],
+        .login-card input[type="password"] {
+            width: calc(100% - 24px);
+            margin-bottom: 16px;
+        }
+
+        .login-card button {
+            width: 100%;
+        }
+
+        .login-card .actions {
+            margin-top: 16px;
+        }
+
+        .login-card p {
+            margin-top: 20px;
+        }
+
+        .login-switch {
+            cursor: pointer;
+            color: var(--accent-blue);
+            text-decoration: underline;
+        }
+
+        /* small note under login forms */
+        .login-note {
+            font-size: 13px;
+            color: var(--accent-orange);
+            background: rgba(237, 149, 60, 0.08);
+            padding: 8px;
+            border-radius: 6px;
+            margin-top: 8px;
+            display: inline-block;
+        }
+
+        /* Headings & Typography */
+        h1, h2, h3 {
+            color: var(--accent-blue);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        fieldset {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 24px;
+            background-color: var(--bg-medium);
+            box-shadow: 0 4px 6px var(--shadow-light);
+        }
+
+        legend {
+            font-weight: bold;
+            color: var(--accent-blue);
+            padding: 0 10px;
+        }
+
+        /* Form & Input Styles */
+        input[type="text"], input[type="number"], input[type="password"] {
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            width: 100%;
+            box-sizing: border-box;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus, input[type="number"]:focus, input[type="password"]:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 6px;
+            border: none;
+            color: var(--text-dark);
+            background: var(--accent-blue);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--accent-blue);
+        }
+
+        .remove-btn {
+            background: var(--bg-light);
+            color: var(--text-light);
+            padding: 8px;
+            font-size: 14px;
+            transition: background-color 0.2s, color 0.2s;
+        }
+
+        .remove-btn:hover {
+            background-color: var(--error-red);
+            color: var(--text-light);
+            box-shadow: none;
+            transform: none;
+        }
+
+        /* Table & Timetable Styles */
+        .table-card {
+            background-color: var(--bg-medium);
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-bottom: 10px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: var(--bg-light);
+            color: var(--accent-blue);
+            font-weight: 600;
+        }
+
+        .tt-wrapper {
+            margin-top: 40px;
+        }
+
+        .tt-table {
+            border-collapse: collapse;
+            width: 100%;
+            box-shadow: 0 4px 8px var(--shadow-dark);
+            background-color: var(--bg-medium);
+            overflow: hidden;
+            border-radius: 8px;
+        }
+
+        .tt-table th, .tt-table td {
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            text-align: center;
+        }
+
+        .tt-table th {
+            background-color: var(--bg-light);
+            color: var(--accent-blue);
+        }
+
+        .tt-table .current-day {
+            background-color: var(--bg-light);
+            font-weight: bold;
+        }
+
+        .tt-table .lunch-cell {
+            writing-mode: vertical-rl;
+            text-orientation: upright;
+            font-weight: bold;
+            background-color: var(--accent-orange);
+            color: var(--text-dark);
+            padding: 8px;
+        }
+
+        .no-class-cell {
+            color: var(--text-light);
+            opacity: 0.6;
+        }
+
+        .subject-cell {
+            font-weight: 600;
+            color: var(--text-dark);
+            position: relative;
+            z-index: 1;
+        }
+
+        .subject-cell::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.7;
+            z-index: -1;
+        }
+
+        /* Status Messages */
+        .status-message {
+            margin-top: 10px;
+            font-weight: bold;
+            padding: 12px;
+            border-radius: 4px;
+            border: 1px solid;
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .status-success {
+            color: var(--accent-green);
+            border-color: var(--accent-green);
+        }
+
+        .status-error {
+            color: var(--error-red);
+            border-color: var(--error-red);
+        }
+
+        /* Utility */
+        .icon {
+            font-size: 1.2rem;
+        }
+
+        .theme-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: auto;
+            cursor: pointer;
+            padding: 12px;
+            border-radius: 8px;
+            transition: background-color 0.2s;
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--bg-light);
+        }
+        
+        #logout-btn {
+            background-color: var(--error-red);
+            color: var(--text-dark);
+        }
+        #logout-btn:hover {
+            box-shadow: 0 4px 12px var(--error-red);
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div id="login-page" class="login-container">
+            <div class="login-card">
+                <div id="admin-login-form">
+                    <h2>Admin Login</h2>
+                    <form id="admin-form">
+                        <input type="text" id="admin-username" placeholder="Username" required />
+                        <input type="password" id="admin-password" placeholder="Password" required />
+                        <div class="actions">
+                            <button type="submit">Login as Admin</button>
+                        </div>
+                    </form>
+                    <p class="status-message" id="admin-status"></p>
+
+                    <!-- ADDED NOTE for Admin -->
+                    <p class="login-note">Username - <b>shubham</b> &amp; Password - <b>shubham</b></p>
+
+                    <p>
+                        <span class="login-switch" onclick="toggleLogin('faculty')">Login as Faculty</span>
+                    </p>
+                </div>
+
+                <div id="faculty-login-form" style="display:none;">
+                    <h2>Faculty Login</h2>
+                    <form id="faculty-form">
+                        <input type="text" id="faculty-username" placeholder="Username" required />
+                        <input type="password" id="faculty-password" placeholder="Password" required />
+                        <div class="actions">
+                            <button type="submit">Login as Faculty</button>
+                        </div>
+                    </form>
+                    <p class="status-message" id="faculty-status"></p>
+
+                    <!-- ADDED NOTE for Faculty -->
+                    <p class="login-note">Username - <b>yourFacultyId</b> &amp; Password - <b>yourFacultyId</b></p>
+
+                    <p>
+                        <span class="login-switch" onclick="toggleLogin('admin')">Login as Admin</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div id="main-app" style="display:none;">
+            <div class="sidebar">
+                <h2 class="sidebar-header">Timetable App</h2>
+                <nav id="sidebar-nav">
+                    </nav>
+                <div class="theme-toggle" onclick="toggleTheme()">
+                    <span id="theme-icon" class="icon">🌙</span>
+                    <span id="theme-text">Dark Mode</span>
+                </div>
+                <button id="logout-btn">Logout</button>
+            </div>
+
+            <div class="main-content">
+                <div id="timetable-page" class="page" style="display:none;">
+                    <h1>Generate Timetable</h1>
+                    <form id="tt-form">
+                        <fieldset>
+                            <legend>Classroom</legend>
+                            <input type="text" id="class-room" placeholder="e.g., ITB4" required />
+                        </fieldset>
+
+                        <fieldset>
+                            <legend>Faculties</legend>
+                            <table id="faculties-table">
+                                <thead>
+                                    <tr>
+                                        <th>facultyId</th>
+                                        <th>subjectName</th>
+                                        <th>totalLecturePerWeek</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                            <div class="actions">
+                                <button type="button" id="add-faculty">Add Faculty</button>
+                            </div>
+                        </fieldset>
+
+                        <fieldset>
+                            <legend>Labs</legend>
+                            <table id="labs-table">
+                                <thead>
+                                    <tr>
+                                        <th>labId</th>
+                                        <th>subjectName</th>
+                                        <th>totalLecturePerWeek</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                            <div class="actions">
+                                <button type="button" id="add-lab">Add Lab</button>
+                            </div>
+                        </fieldset>
+
+                        <div class="actions">
+                            <button type="submit">Generate</button>
+                            <button type="button" id="fill-sample">Fill Sample Data</button>
+                        </div>
+                    </form>
+
+                    <div class="tt-wrapper">
+                        <h2>Visual Timetable</h2>
+                        <div id="timetable-container"></div>
+                    </div>
+                </div>
+
+                <div id="faculty-page" class="page" style="display:none;">
+                    <h1>Manual Faculty Entry</h1>
+                    <fieldset>
+                        <legend>Add Faculty</legend>
+                        <div style="display:flex; gap:10px; align-items:center;">
+                            <input type="text" id="manual-faculty-id" placeholder="e.g., t2001" />
+                            <button type="button" id="create-faculty-btn">Create Faculty</button>
+                        </div>
+                        <div id="create-faculty-status" class="status-message"></div>
+                    </fieldset>
+                </div>
+
+                <div id="view-faculty-page" class="page" style="display:none;">
+                    <h1>View Faculty Timetable</h1>
+                    <fieldset>
+                        <legend>Enter Faculty ID</legend>
+                        <div style="display:flex; gap:10px; align-items:center;">
+                            <input type="text" id="view-faculty-id" placeholder="e.g., t1001" />
+                            <button type="button" id="view-faculty-btn">View Timetable</button>
+                        </div>
+                    </fieldset>
+                    <div class="tt-wrapper">
+                        <h3>Faculty Timetable</h3>
+                        <div id="faculty-timetable-container"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8080/api/timetable/generate';
+        const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+        const subjectColors = ['--subject-color-1', '--subject-color-2', '--subject-color-3', '--subject-color-4', '--subject-color-5'];
+        const subjectMap = new Map();
+        let colorIndex = 0;
+
+        function showPage(id, element) {
+            document.querySelectorAll(".page").forEach(el => el.style.display = "none");
+            document.getElementById(id).style.display = "block";
+            document.querySelectorAll(".sidebar nav a").forEach(el => el.classList.remove("active"));
+            if (element) {
+                element.classList.add("active");
+            }
+        }
+
+        function getSubjectColor(subject) {
+            if (!subjectMap.has(subject)) {
+                subjectMap.set(subject, subjectColors[colorIndex % subjectColors.length]);
+                colorIndex++;
+            }
+            return `var(${subjectMap.get(subject)})`;
+        }
+        
+        function renderTable(matrix, containerId) {
+            const today = new Date().getDay() - 1;
+            let html = '<table class="tt-table">';
+            html += '<tr><th>Day</th>';
+            for (let i = 1; i <= 4; i++) html += `<th>${i} Period</th>`;
+            html += '<th class="lunch-cell">LUNCH</th>';
+            for (let i = 5; i <= 8; i++) html += `<th>${i} Period</th>`;
+            html += '</tr>';
+
+            matrix.forEach((row, dayIndex) => {
+                const rowClass = dayIndex === today ? 'current-day' : '';
+                html += `<tr class="${rowClass}"><td>${days[dayIndex]}</td>`;
+                row.forEach((cell, i) => {
+                    if (i === 4) {
+                        html += `<td class="lunch-cell">LUNCH</td>`;
+                    }
+                    const displayCell = (cell === null || cell === "") ? `<span class="no-class-cell">No Class</span>` : cell;
+                    const cellColor = (cell !== null && cell !== "") ? `background-color: ${getSubjectColor(cell)};` : '';
+                    html += `<td class="subject-cell" style="${cellColor}">${displayCell}</td>`;
+                });
+                html += '</tr>';
+            });
+            html += '</table>';
+            document.getElementById(containerId).innerHTML = html;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            document.getElementById('main-app').style.display = 'none';
+            document.getElementById('login-page').style.display = 'flex';
+        });
+
+        // Login Logic
+        const adminForm = document.getElementById('admin-form');
+        const facultyForm = document.getElementById('faculty-form');
+        const adminStatus = document.getElementById('admin-status');
+        const facultyStatus = document.getElementById('faculty-status');
+        const sidebar = document.querySelector('.sidebar');
+        const sidebarNav = document.getElementById('sidebar-nav');
+        const mainApp = document.getElementById('main-app');
+        const loginPage = document.getElementById('login-page');
+        const logoutBtn = document.getElementById('logout-btn');
+
+        function toggleLogin(userType) {
+            if (userType === 'admin') {
+                document.getElementById('admin-login-form').style.display = 'block';
+                document.getElementById('faculty-login-form').style.display = 'none';
+            } else {
+                document.getElementById('admin-login-form').style.display = 'none';
+                document.getElementById('faculty-login-form').style.display = 'block';
+            }
+            adminStatus.textContent = '';
+            facultyStatus.textContent = '';
+        }
+
+        function showApp(role, userId) {
+            loginPage.style.display = 'none';
+            mainApp.style.display = 'flex';
+            sidebar.style.display = 'flex';
+            sidebarNav.innerHTML = ''; // Clear previous links
+
+            if (role === 'admin') {
+                sidebarNav.innerHTML = `
+                    <a href="#" onclick="showPage('timetable-page', this)"><span class="icon">📅</span> Generate Timetable</a>
+                    <a href="#" onclick="showPage('faculty-page', this)"><span class="icon">👨‍🏫</span> Manual Faculty Entry</a>
+                    <a href="#" onclick="showPage('view-faculty-page', this)"><span class="icon">📚</span> View Faculty Timetable</a>
+                `;
+                showPage('timetable-page', document.querySelector("#sidebar-nav a"));
+            } else if (role === 'faculty') {
+                sidebarNav.innerHTML = `
+                    <a href="#" onclick="showPage('view-faculty-page', this)"><span class="icon">📚</span> View My Timetable</a>
+                `;
+                viewFacultyTimetable(userId);
+                showPage('view-faculty-page', document.querySelector("#sidebar-nav a"));
+                document.getElementById('view-faculty-id').value = userId;
+                document.getElementById('view-faculty-id').disabled = true;
+                document.getElementById('view-faculty-btn').style.display = 'none';
+            }
+        }
+
+        function logout() {
+            sessionStorage.clear();
+            sidebar.style.display = 'none';
+            mainApp.style.display = 'none';
+            loginPage.style.display = 'flex';
+            document.getElementById('view-faculty-id').disabled = false;
+            document.getElementById('view-faculty-btn').style.display = 'flex';
+            document.getElementById('view-faculty-id').value = '';
+            document.getElementById('faculty-timetable-container').innerHTML = '';
+        }
+
+        adminForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = document.getElementById('admin-username').value;
+            const password = document.getElementById('admin-password').value;
+            if (username === "shubham" && password === "shubham") {
+                sessionStorage.setItem('userRole', 'admin');
+                showApp('admin');
+            } else {
+                adminStatus.textContent = "❌ Invalid username or password";
+                adminStatus.className = "status-message status-error";
+            }
+        });
+
+        facultyForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = document.getElementById('faculty-username').value;
+            const password = document.getElementById('faculty-password').value;
+            if (username === password) {
+                sessionStorage.setItem('userRole', 'faculty');
+                sessionStorage.setItem('userId', username);
+                showApp('faculty', username);
+            } else {
+                facultyStatus.textContent = "❌ Invalid username or password";
+                facultyStatus.className = "status-message status-error";
+            }
+        });
+
+        logoutBtn.addEventListener('click', logout);
+
+
+        // Re-added the existing functionality below
+        const facultiesBody = document.querySelector('#faculties-table tbody');
+        const labsBody = document.querySelector('#labs-table tbody');
+        const addFacultyBtn = document.getElementById('add-faculty');
+        const addLabBtn = document.getElementById('add-lab');
+        const form = document.getElementById('tt-form');
+        const fillSampleBtn = document.getElementById('fill-sample');
+        const timetableContainer = document.getElementById('timetable-container');
+
+        function addRow(tbody, fields) {
+            const tr = document.createElement('tr');
+            fields.forEach(({ name, type = 'text', placeholder = '' }) => {
+                const td = document.createElement('td');
+                const input = document.createElement('input');
+                input.type = type;
+                input.placeholder = placeholder || name;
+                input.dataset.name = name;
+                td.appendChild(input);
+                tr.appendChild(td);
+            });
+            const tdRemove = document.createElement('td');
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.textContent = '✕';
+            btn.className = 'remove-btn';
+            btn.addEventListener('click', () => tr.remove());
+            tdRemove.appendChild(btn);
+            tr.appendChild(tdRemove);
+            tbody.appendChild(tr);
+        }
+
+        function getTableData(tbody, mapping) {
+            const rows = [];
+            tbody.querySelectorAll('tr').forEach(tr => {
+                const obj = {};
+                let isValid = true;
+                mapping.forEach(({ name, cast }) => {
+                    const input = tr.querySelector(`input[data-name="${name}"]`);
+                    let val = input ? input.value.trim() : '';
+                    if (!val) {
+                        isValid = false;
+                        return;
+                    }
+                    if (cast === 'int') {
+                        const n = parseInt(val, 10);
+                        if (isNaN(n)) {
+                            isValid = false;
+                            return;
+                        }
+                        val = n;
+                    }
+                    obj[name] = val;
+                });
+                if (isValid) rows.push(obj);
+            });
+            return rows;
+        }
+
+        addFacultyBtn.addEventListener('click', () => {
+            addRow(facultiesBody, [
+                { name: 'facultyId', type: 'text' },
+                { name: 'subjectName' },
+                { name: 'totalLecturePerWeek', type: 'number' },
+            ]);
+        });
+
+        addLabBtn.addEventListener('click', () => {
+            addRow(labsBody, [
+                { name: 'labId', type: 'text' },
+                { name: 'subjectName' },
+                { name: 'totalLecturePerWeek', type: 'number' },
+            ]);
+        });
+
+        fillSampleBtn.addEventListener('click', () => {
+            facultiesBody.innerHTML = '';
+            labsBody.innerHTML = '';
+
+            const sampleFaculties = [
+                { facultyId: 't1001', subjectName: 'MATHS', totalLecturePerWeek: 12 },
+                { facultyId: 't1002', subjectName: 'PHYSICS', totalLecturePerWeek: 12 },
+                { facultyId: 't1003', subjectName: 'ENGLISH', totalLecturePerWeek: 6 },
+                { facultyId: 't1004', subjectName: 'CN', totalLecturePerWeek: 4 },
+            ];
+            const sampleLabs = [
+                { labId: 'l1001', subjectName: 'DSA', totalLecturePerWeek: 6 },
+                { labId: 'l1002', subjectName: 'CN', totalLecturePerWeek: 6 },
+                { labId: 'l1003', subjectName: 'MOOCS', totalLecturePerWeek: 2 },
+            ];
+
+            sampleFaculties.forEach(() => addFacultyBtn.click());
+            sampleLabs.forEach(() => addLabBtn.click());
+
+            facultiesBody.querySelectorAll('tr').forEach((tr, i) => {
+                const f = sampleFaculties[i];
+                tr.querySelector('input[data-name="facultyId"]').value = f.facultyId;
+                tr.querySelector('input[data-name="subjectName"]').value = f.subjectName;
+                tr.querySelector('input[data-name="totalLecturePerWeek"]').value = f.totalLecturePerWeek;
+            });
+            labsBody.querySelectorAll('tr').forEach((tr, i) => {
+                const l = sampleLabs[i];
+                tr.querySelector('input[data-name="labId"]').value = l.labId;
+                tr.querySelector('input[data-name="subjectName"]').value = l.subjectName;
+                tr.querySelector('input[data-name="totalLecturePerWeek"]').value = l.totalLecturePerWeek;
+            });
+        });
+
+        async function fetchWithTimeoutRetry(url, options = {}, timeoutMs = 200, retryDelayMs = 200) {
+            while (true) {
+                const controller = new AbortController();
+                const id = setTimeout(() => controller.abort(), timeoutMs);
+                try {
+                    const res = await fetch(url, { ...options, signal: controller.signal });
+                    clearTimeout(id);
+                    if (res.ok) return res;
+                    await new Promise(r => setTimeout(r, retryDelayMs));
+                } catch (err) {
+                    clearTimeout(id);
+                    await new Promise(r => setTimeout(r, retryDelayMs));
+                }
+            }
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                const classRoom = document.getElementById('class-room').value.trim();
+                if (!classRoom) {
+                    timetableContainer.innerHTML = "<p class='status-message status-error'>❌ Please enter a classroom name.</p>";
+                    return;
+                }
+
+                const faculties = getTableData(facultiesBody, [
+                    { name: 'facultyId' },
+                    { name: 'subjectName' },
+                    { name: 'totalLecturePerWeek', cast: 'int' },
+                ]);
+                const labs = getTableData(labsBody, [
+                    { name: 'labId' },
+                    { name: 'subjectName' },
+                    { name: 'totalLecturePerWeek', cast: 'int' },
+                ]);
+
+                if (faculties.length === 0 && labs.length === 0) {
+                    timetableContainer.innerHTML = "<p class='status-message status-error'>❌ Please add at least one faculty or lab.</p>";
+                    return;
+                }
+
+                const payload = { classRoom, faculties, labs };
+                timetableContainer.innerHTML = "<p class='status-message status-success'>⏳ Loading timetable...</p>";
+                subjectMap.clear();
+                colorIndex = 0;
+
+                const res = await fetchWithTimeoutRetry(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                }, 200, 200);
+
+                const json = await res.json();
+                if (Array.isArray(json) && json.length === 6 && json.every(r => Array.isArray(r) && r.length === 8)) {
+                    renderTable(json, "timetable-container");
+                } else {
+                    timetableContainer.innerHTML = "<p class='status-message status-error'>❌ Invalid timetable format received.</p>";
+                }
+            } catch (err) {
+                timetableContainer.innerHTML = `<p class="status-message status-error">❌ Error: ${err.message}</p>`;
+            }
+        });
+
+        const createFacultyBtn = document.getElementById('create-faculty-btn');
+        const manualFacultyInput = document.getElementById('manual-faculty-id');
+        const createFacultyStatus = document.getElementById('create-faculty-status');
+
+        createFacultyBtn.addEventListener('click', async () => {
+            const facultyId = manualFacultyInput.value.trim();
+            if (!facultyId) {
+                createFacultyStatus.className = "status-message status-error";
+                createFacultyStatus.textContent = "❌ Please enter a valid Faculty ID.";
+                return;
+            }
+
+            createFacultyStatus.className = "status-message status-success";
+            createFacultyStatus.textContent = "⏳ Creating faculty...";
+
+            try {
+                const res = await fetch(`http://localhost:8080/api/faculty/createTable/${facultyId}`, {
+                    method: "POST"
+                });
+
+                if (res.ok) {
+                    const text = await res.text();
+                    createFacultyStatus.className = "status-message status-success";
+                    createFacultyStatus.textContent = `✅ Faculty created: ${text}`;
+                } else {
+                    const errorText = await res.text();
+                    createFacultyStatus.className = "status-message status-error";
+                    createFacultyStatus.textContent = `❌ Error: ${errorText}`;
+                }
+            } catch (err) {
+                createFacultyStatus.className = "status-message status-error";
+                createFacultyStatus.textContent = `❌ Request failed: ${err.message}`;
+            }
+        });
+
+        const viewFacultyBtn = document.getElementById('view-faculty-btn');
+        const viewFacultyInput = document.getElementById('view-faculty-id');
+        const facultyTimetableContainer = document.getElementById('faculty-timetable-container');
+
+        async function viewFacultyTimetable(facultyId) {
+            if (!facultyId) {
+                facultyTimetableContainer.innerHTML = "<p class='status-message status-error'>❌ Please enter a valid Faculty ID.</p>";
+                return;
+            }
+
+            facultyTimetableContainer.innerHTML = "<p class='status-message status-success'>⏳ Loading timetable...</p>";
+            try {
+                const res = await fetch(`http://localhost:8080/api/faculty-timetable/${facultyId}`);
+                if (res.status === 404) {
+                    facultyTimetableContainer.innerHTML = "<p class='status-message status-error'>❌ No faculty with that ID found in the database.</p>";
+                    return;
+                }
+                if (!res.ok) {
+                    const errorText = await res.text();
+                    throw new Error(errorText || `API returned status ${res.status}`);
+                }
+                const json = await res.json();
+                
+                subjectMap.clear();
+                colorIndex = 0;
+
+                if (Array.isArray(json) && json.length === 6 && json.every(r => Array.isArray(r) && r.length === 8)) {
+                    renderTable(json, "faculty-timetable-container");
+                } else {
+                    facultyTimetableContainer.innerHTML = "<p class='status-message status-error'>❌ Invalid timetable format received.</p>";
+                }
+            } catch (err) {
+                facultyTimetableContainer.innerHTML = `<p class="status-message status-error">❌ Error: ${err.message}</p>`;
+            }
+        }
+
+        viewFacultyBtn.addEventListener('click', () => {
+            const facultyId = viewFacultyInput.value.trim();
+            viewFacultyTimetable(facultyId);
+        });
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            document.getElementById('theme-icon').textContent = newTheme === 'dark' ? '🌙' : '☀️';
+            document.getElementById('theme-text').textContent = newTheme === 'dark' ? 'Dark Mode' : 'Light Mode';
+        }
+    </script>
+</body>
+</html>
