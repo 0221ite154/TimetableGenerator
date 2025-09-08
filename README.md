@@ -38,9 +38,9 @@ Backend (Spring Boot)
 
 // Clone the repository
 
-git clone https://github.com/your-username/timetable-generator.git
+git clone https://github.com/0221ite154/TimetableGenerator.git
 
-cd timetable-generator
+cd TimetableGenerator
 
 // Run the Spring Boot app
 
